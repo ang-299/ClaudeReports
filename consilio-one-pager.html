@@ -1,0 +1,187 @@
+<title>Consilio One-Pager</title>
+<style>
+/* Layout: dense desk-style one-pager. Header + stat strip, business model and positions side by side, then the line-item blotter by fund, then internal-comms summary. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#13202b; --ink2:#4c5a66; --ink3:#77848f; --line:#dde3e8; --grid:#e8ecef;
+  --accent:#2a78d6; --pos:#1baf7a; --neg:#eb6834; --hover:#eef3f9; --warn-bg:#fff6e0; --warn-ink:#6b4a00;
+  --sans:system-ui,-apple-system,'Segoe UI',sans-serif; --mono:ui-monospace,'SFMono-Regular',Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f161c; --surface:#172029; --ink:#eef2f5; --ink2:#b4bfc8; --ink3:#8793a0; --line:#2a3642; --grid:#212c36;
+  --accent:#3987e5; --pos:#199e70; --neg:#d95926; --hover:#1e2b37; --warn-bg:#3a2f12; --warn-ink:#f1d48a; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0f161c; --surface:#172029; --ink:#eef2f5; --ink2:#b4bfc8; --ink3:#8793a0; --line:#2a3642; --grid:#212c36;
+  --accent:#3987e5; --pos:#199e70; --neg:#d95926; --hover:#1e2b37; --warn-bg:#3a2f12; --warn-ink:#f1d48a; color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.45;margin:0;padding-inline:16px;padding-block:20px 40px}
+.wrap{max-width:1300px;margin-inline:auto;display:flex;flex-direction:column;gap:16px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:8px 24px}
+h1{margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--ink2);font-size:13px}
+.asof{font-family:var(--mono);font-size:12px;color:var(--ink2);text-align:right}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.stat{background:var(--surface);padding:12px 16px;min-width:0}
+.stat .k{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.stat .v{font-family:var(--mono);font-size:21px;font-weight:500;margin-top:2px}
+.stat .n{font-size:12px;color:var(--ink2);margin-top:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;min-width:0}
+.card h2{margin:0 0 6px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.card h3{margin:12px 0 4px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+.card p{margin:0 0 8px}
+.card ul{margin:0;padding-left:18px}
+.card li{margin-bottom:4px}
+.cap{color:var(--ink3);font-size:12px;margin-bottom:8px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.mix{display:flex;height:22px;border-radius:4px;overflow:hidden;margin:6px 0 4px;font-size:11px;font-family:var(--mono);color:#fff}
+.mix span{display:flex;align-items:center;justify-content:center}
+.tblwrap{overflow:auto;border:1px solid var(--line);border-radius:5px}
+table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}
+th{background:var(--surface);text-align:right;font-weight:600;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);border-bottom:1px solid var(--line);padding:8px}
+th.l,td.l{text-align:left}
+td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--grid)}
+tr:hover td{background:var(--hover)}
+tr.sub td{font-weight:600;background:var(--grid)}
+tfoot td{font-weight:600;border-top:1px solid var(--line)}
+tr.grp td{background:var(--bg);color:var(--ink3);font-size:11px;letter-spacing:.06em;text-transform:uppercase;text-align:left}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+.tag{font-size:10px;font-weight:600;letter-spacing:.05em;padding:1px 6px;border-radius:3px;border:1px solid var(--line);color:var(--ink2);margin-left:6px}
+.notes{font-size:12px;color:var(--ink2);display:flex;flex-direction:column;gap:4px}
+.flag{background:var(--warn-bg);color:var(--warn-ink);border-radius:6px;padding:10px 14px;font-size:12px}
+.src{color:var(--ink3);font-size:11px}
+@media (max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
+@media print{body{background:#fff}.card,.stats{break-inside:avoid}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Consilio <span class="sub">(Skopima Consilio Parent LLC &middot; ADVDIS)</span></h1>
+      <div class="sub">Issuer one-pager &middot; eDiscovery / legal services &middot; Stone Point Capital-owned &middot; Wristband author: Francesco De Col</div>
+    </div>
+    <div class="asof">KS positions as of 2026-09-30 (Risk Cube)<br>Loan market data as of 2026-09-30 (Markit) &middot; USD</div>
+  </header>
+
+  <section class="stats" aria-label="Summary">
+    <div class="stat"><div class="k">KS market value</div><div class="v">$59.9mm</div><div class="n">$63.2mm par &middot; 1 line item &middot; 24 vehicles</div></div>
+    <div class="stat"><div class="k">KS mark</div><div class="v">94.88</div><div class="n">+0.07 d/d (94.81 prior) &middot; YTD +4.0 from 90.95</div></div>
+    <div class="stat"><div class="k">Markit bid / offer</div><div class="v">94.98 / 96.02</div><div class="n">mid 95.50 &middot; bid-ask 1.03pt</div></div>
+    <div class="stat"><div class="k">OAS / Z-spread</div><div class="v">689 bp</div><div class="n">G-spread 682 bp &middot; Markit STM 708 bp</div></div>
+    <div class="stat"><div class="k">YTM / current yield</div><div class="v">11.7% / 8.0%</div><div class="n">Markit &middot; S+375 stated margin, mat. 5/12/28</div></div>
+    <div class="stat"><div class="k">Ratings</div><div class="v">B3 / B-</div><div class="n">Moody's B3 &middot; KS rating B-</div></div>
+    <div class="stat"><div class="k">Spread DV01 (CS01)</div><div class="v">$9.1k</div><div class="n">spread duration 1.51y</div></div>
+    <div class="stat"><div class="k">Jump-to-default</div><div class="v neg">($16.1mm)</div><div class="n">sum of fund-level JTD</div></div>
+  </section>
+
+  <section class="two">
+    <div class="card">
+      <h2>Business model</h2>
+      <p>Consilio is a global, tech-enabled legal services provider focused on eDiscovery: collecting, hosting, processing ("ingesting") and reviewing electronic data that becomes evidence in litigation, investigations and regulatory matters. Customers are ~90% corporates and ~10% law firms (blue chips ~50%, big tech ~25%, banks ~15%); no customer is above 10% of revenue and no single matter above 5%.</p>
+      <h3>Revenue mix (approx.)</h3>
+      <div class="mix" role="img" aria-label="Revenue mix: eDiscovery and hosting about 50 percent, review solutions about 30 percent, enterprise legal solutions about 20 percent">
+        <span style="width:50%;background:var(--accent)">Hosting / eDiscovery 50%</span>
+        <span style="width:30%;background:#eda100">Review 30%</span>
+        <span style="width:20%;background:#5d6b78">Ent. Legal 20%</span>
+      </div>
+      <ul>
+        <li><b>Hosting / eDiscovery:</b> priced on data volume. Up to ~75% gross margin and the bulk of profit. Hosted data is bundled with processing and analytics, which makes it sticky.</li>
+        <li><b>Review solutions:</b> contract attorneys billed hourly. Labor-heavy with mid-20s gross margins, ~15% of GP/EBITDA. First-pass review is the most automatable and lowest-margin piece.</li>
+        <li><b>Enterprise Legal Solutions:</b> on-demand lawyers for non-core work, also hourly.</li>
+      </ul>
+      <h3>Why it earns its margins (analyst view)</h3>
+      <ul>
+        <li>Scale and bundled pricing: large clients get discounted hosting and law firms are steered to the vendor. ~60-70% of eDiscovery revenue comes from existing matters that run ~5+ years and cannot be migrated quickly.</li>
+        <li>Courts require key parts of discovery to be human-verified, which limits near-term AI substitution.</li>
+      </ul>
+      <h3>Ownership, capital structure and debate</h3>
+      <ul>
+        <li>Stone Point bought it in 2021 for ~$3bn (~9x EBITDA). Debt: $1.98bn Amendment No. 5 first-lien TL (S+375, May 2028), $80mm revolver (S+350), prior second lien retired Dec 2024.</li>
+        <li><b>Key risks:</b> AI disrupting document review; Relativity (the dominant review platform) pushing clients to RelativityOne and competing with Consilio's own AI (Rel Server closed to new matters from 1 Jan 2028); Microsoft Purview and Google self-service filtering at source; price compression. The loan sold off ~15+pts on these fears.</li>
+      </ul>
+      <h3>Fundamentals (2Q26, reported 11 Aug)</h3>
+      <ul>
+        <li>Revenue +9% y/y, EBITDA +10% y/y at a 31% margin (30% in 2Q25). FY26 guide raised to revenue $1,195-1,240mm and Adj. EBITDA $360-375mm.</li>
+        <li>Net leverage 4.8x, $180mm cash, $275mm liquidity. KPIs: hosted data +18% y/y, ingested data +35% (lumpy), review hours +2%.</li>
+        <li>Docs (per analyst note): ~$1.5bn general incremental capacity, 7.5x net first-lien springing covenant tested only if the revolver is drawn above 35%. Next earnings expected November.</li>
+      </ul>
+      <div class="src">Sources: BipSync notes (Consilio TL 2028, Quick Pitch, Tech Review, expert calls, Wristband) and internal Position Update emails. Fundamentals are as quoted in the 2Q26 update, not independently pulled from Octus.</div>
+    </div>
+
+    <div class="card">
+      <h2>Internal communications summary</h2>
+      <div class="cap">Outlook (internal King Street senders) and BipSync, Jul to Oct 2026. Teams chat was not searched.</div>
+      <h3>Current stance</h3>
+      <ul>
+        <li><b>Wristband (F. De Col, w/e 2 Oct): Neutral.</b> No update, no action plan. Price unchanged WoW (94.98), +0.1pt MTD, +4.0pts YTD from 90.95.</li>
+        <li><b>1 Sep Position Update:</b> Consilio bought Australian eDiscovery provider icourts (est. sub-$5mm revenue, immaterial; Consilio already had an Australian presence). TL unchanged and no recommendation, but the team is re-underwriting and refreshing law-firm eDiscovery manager calls. A recommendation on <b>adding to the position ahead of November earnings</b> is to follow.</li>
+        <li><b>11 Aug Position Update (2Q26):</b> strong print, TL up ~3pts to 91-92 / 12-13% YTM. Management called AI an accelerator (record revenue/EBITDA, higher review hours), is buying its own GPUs so it is not dependent on third-party LLMs, and said it will compare buybacks vs internal investment vs tuck-in M&amp;A while monitoring loan pricing. Analyst returns at 91.25 (8/11 table): base +14.8%, upside +18.1%, downside -14.8%.</li>
+        <li><b>7 Jul Position Update:</b> Consilio / Eudia partnership (18 Jun) for AI-enabled outcome-based services. Viewed as a slight positive and an upsell opportunity, not a protection for the review business. TL then at 85-86 (84.00 / 17.9% yield in the note's price table).</li>
+      </ul>
+      <h3>Investment thesis (BipSync)</h3>
+      <ul>
+        <li>Initiated 18 Nov 2025: bought $5.0mm @ 89.75, 25bp HF target, ~65% LTV. Scaled 15-16 Jan 2026 with $11.1mm @ 87.75 toward a 50bp target. LTVs use a 7.5x multiple vs 8-9x sponsor multiples. Base case ~11% 1Y return at current YTW, up to ~15% if loans trade to a 10% YTC.</li>
+        <li>Loan viewed as well covered even in bearish scenarios (100% recovery in the bear case). LME risk judged low: ~30% margins, &lt;5% capex intensity, ~$250mm liquidity at the time, ~$150mm cash.</li>
+      </ul>
+      <h3>Recent diligence (Aug to Sep)</h3>
+      <ul>
+        <li><b>Expert call, 21 Sep (former Consilio PM):</b> "the Walmart of eDiscovery" with scale-driven margins. Large clients get favorable bundled pricing; vendors discount hosting and recoup through services. AI-led review remains risky and unproven; per-document, per-iteration pricing is a barrier. Negative on the employer's cost discipline and utilisation culture.</li>
+        <li><b>Cleary eDiscovery catch-up, 4 Sep:</b> continued price compression expected; vendors are shifting to consumption-based AI pricing. Hosting keeps growing with data volumes. Long-term risk is Microsoft or Google filtering at source and self-hosting. Relativity is hostile to Consilio's AI; existing matters can stay on Rel Server after 2028, so few forced migrations.</li>
+        <li><b>BofA conference lender feedback:</b> Ares found management bullish and possibly "over-salesy", but confident AI risk is small and Relativity is not a problem.</li>
+        <li><b>Quick Pitch note (K. Rajput section):</b> Relativity hosts ~30% of active data (not 15%); 87% of Consilio is on private cloud; a big buyer was reported accumulating the loan (see compliance note).</li>
+      </ul>
+      <h3>Operational / flow emails</h3>
+      <ul>
+        <li>Daily Flagship P&amp;L emails list Consilio as a top contributor on 17-18 Sep (about +$275k and +$107k) and a detractor on 2 Sep (about -$166k). The 30 Sep estimated P&amp;L shows +$42.9k on the move from 94.81 to 94.88. The RFT exposure and CLO price-movement emails in the mailbox are automated and not Consilio-specific.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>KS positions by fund and line item</h2>
+    <div class="cap">Single line item: Consilio TL 2028 (CUSIP 36171NAG1 / ISIN US36171NAG16), 1st lien bank debt, USD, long in every vehicle. All vehicles share one price and spread because they hold the same loan; per-fund differences are size only.</div>
+    <div class="tblwrap">
+      <table>
+        <thead><tr>
+          <th class="l">Fund</th><th class="l">Vehicle</th><th>Par ($)</th><th>MV ($)</th><th>Px</th><th>% of KS total</th><th>OAS (bp)</th><th>G-sprd (bp)</th><th>Cpn sprd (bp)</th><th>Sprd dur (y)</th><th>CS01 ($)</th><th>JTD ($)</th>
+        </tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="12">Flagship (KSCM hedge fund) &mdash; total $29.76mm MV, 49.7% of KS</td></tr>
+          <tr><td class="l">Flagship</td><td class="l">LP</td><td class="num">11,046,427</td><td class="num">10,480,297</td><td class="num">94.88</td><td class="num">17.5%</td><td class="num" rowspan="2">689</td><td class="num" rowspan="2">682</td><td class="num" rowspan="2">350</td><td class="num" rowspan="2">1.51</td><td class="num" rowspan="2">4,505</td><td class="num neg" rowspan="2">(8,002,275)</td></tr>
+          <tr><td class="l">Flagship</td><td class="l">LTD</td><td class="num">20,322,751</td><td class="num">19,281,210</td><td class="num">94.88</td><td class="num">32.2%</td></tr>
+          <tr class="grp"><td colspan="12">TCC HEF &mdash; $1.47mm MV</td></tr>
+          <tr><td class="l">TCC HEF</td><td class="l">HEF</td><td class="num">1,545,383</td><td class="num">1,466,182</td><td class="num">94.88</td><td class="num">2.4%</td><td class="num">689</td><td class="num">682</td><td class="num">350</td><td class="num">1.51</td><td class="num">222</td><td class="num neg">(394,227)</td></tr>
+          <tr class="grp"><td colspan="12">UC Regents (SMA) &mdash; $4.73mm MV</td></tr>
+          <tr><td class="l">UC Regents</td><td class="l">UCR</td><td class="num">4,984,539</td><td class="num">4,729,081</td><td class="num">94.88</td><td class="num">7.9%</td><td class="num">689</td><td class="num">682</td><td class="num">350</td><td class="num">1.51</td><td class="num">716</td><td class="num neg">(1,271,555)</td></tr>
+          <tr class="grp"><td colspan="12">XA Investments &mdash; $1.80mm MV</td></tr>
+          <tr><td class="l">XA Investments</td><td class="l">XFLT</td><td class="num">1,895,100</td><td class="num">1,797,976</td><td class="num">94.88</td><td class="num">3.0%</td><td class="num">689</td><td class="num">682</td><td class="num">350</td><td class="num">1.51</td><td class="num">272</td><td class="num neg">(483,440)</td></tr>
+          <tr class="grp"><td colspan="12">RT CBOs &mdash; $1.15mm MV</td></tr>
+          <tr><td class="l">RT CBOs</td><td class="l">RTC1</td><td class="num">1,215,458</td><td class="num">1,153,166</td><td class="num">94.88</td><td class="num">1.9%</td><td class="num">689</td><td class="num">682</td><td class="num">350</td><td class="num">1.51</td><td class="num">175</td><td class="num neg">(310,063)</td></tr>
+          <tr class="grp"><td colspan="12">RT CLOs (Rockford Tower, 18 vehicles) &mdash; $21.01mm MV, 35.1% of KS</td></tr>
+          <tr><td class="l">RT CLOs</td><td class="l">RFT7</td><td class="num">2,122,410</td><td class="num">2,013,637</td><td class="num">94.88</td><td class="num">3.4%</td><td class="num" rowspan="11">689</td><td class="num" rowspan="11">682</td><td class="num" rowspan="11">350</td><td class="num" rowspan="11">1.51</td><td class="num" rowspan="11">3,180</td><td class="num neg" rowspan="11">(5,648,863)</td></tr>
+          <tr><td class="l">RT CLOs</td><td class="l">RFT11</td><td class="num">1,704,309</td><td class="num">1,616,963</td><td class="num">94.88</td><td class="num">2.7%</td></tr>
+          <tr><td class="l">RT CLOs</td><td class="l">RFT18</td><td class="num">1,605,198</td><td class="num">1,522,931</td><td class="num">94.88</td><td class="num">2.5%</td></tr>
+          <tr><td class="l">RT CLOs</td><td class="l">RFT19</td><td class="num">1,556,805</td><td class="num">1,477,019</td><td class="num">94.88</td><td class="num">2.5%</td></tr>
+          <tr><td class="l">RT CLOs</td><td class="l">RFT20</td><td class="num">1,484,249</td><td class="num">1,408,181</td><td class="num">94.88</td><td class="num">2.4%</td></tr>
+          <tr><td class="l">RT CLOs</td><td class="l">RFT1</td><td class="num">1,211,854</td><td class="num">1,149,746</td><td class="num">94.88</td><td class="num">1.9%</td></tr>
+          <tr><td class="l">RT CLOs</td><td class="l">RFT6</td><td class="num">1,211,854</td><td class="num">1,149,746</td><td class="num">94.88</td><td class="num">1.9%</td></tr>
+          <tr><td class="l">RT CLOs</td><td class="l">RFT12</td><td class="num">1,211,854</td><td class="num">1,149,746</td><td class="num">94.88</td><td class="num">1.9%</td></tr>
+          <tr><td class="l">RT CLOs</td><td class="l">RFT5</td><td class="num">1,162,536</td><td class="num">1,102,956</td><td class="num">94.88</td><td class="num">1.8%</td></tr>
+          <tr><td class="l">RT CLOs</td><td class="l">RFT8, 9, 10, 13, 14, 15, 16, 17 (8 vehicles, $1,013,383 par / $961,447 MV each)</td><td class="num">8,107,063</td><td class="num">7,691,576</td><td class="num">94.88</td><td class="num">12.8%</td></tr>
+          <tr><td class="l">RT CLOs</td><td class="l">RFT4</td><td class="num">765,595</td><td class="num">726,358</td><td class="num">94.88</td><td class="num">1.2%</td></tr>
+          <tr class="sub"><td class="l">RT CLOs</td><td class="l">Subtotal (18 vehicles)</td><td class="num">22,143,725</td><td class="num">21,008,859</td><td class="num">94.88</td><td class="num">35.1%</td><td class="num">689</td><td class="num">682</td><td class="num">350</td><td class="num">1.51</td><td class="num">3,180</td><td class="num neg">(5,648,863)</td></tr>
+        </tbody>
+        <tfoot><tr><td class="l" colspan="2">Total KS</td><td class="num">63,153,382</td><td class="num">59,916,772</td><td class="num">94.88</td><td class="num">100%</td><td class="num">689</td><td class="num">682</td><td class="num">350</td><td class="num">1.51</td><td class="num">9,070</td><td class="num neg">(16,110,423)</td></tr></tfoot>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:10px">
+      <div><b>Trading levels:</b> KS mark 94.88 (9/30, from the daily P&amp;L email) vs Markit 94.98 bid / 96.02 offer / 95.50 mid. The facility matched is Amendment No. 5 Term Loan (LX256054, $1.98bn, 5/12/2028), matched by name rather than CUSIP, so please confirm. KS marks below Markit mid by ~0.6pt. Entry levels were 89.75 (Nov 25) and 87.75 (Jan 26), so the position is up ~5-7pts on cost; the loan was marked as low as ~84 in the 7 Jul update.</div>
+      <div><b>Spreads:</b> Risk Cube MV-weighted OAS and Z-spread 689 bp, G-spread 682 bp, spread duration 1.51y. Markit shows STM 708 bp, YTM 11.7%, current yield 8.0%. <b>Discrepancy:</b> the Risk Cube coupon spread is 350 bp but Markit's stated spread is 375 bp (the revolver is S+350), which may reflect a pricing grid or a mapping issue.</div>
+      <div><b>Other Consilio paper not held:</b> $80mm revolver (LX194593) marks 91.9 / 92.9; the Midco and Advanced Discovery entities have no live KS positions. 1st-lien TL is the only line item.</div>
+      <div><b>Wristband exposure (1 Oct):</b> $59.9mm exposure / $63.1mm notional in total; Hedge Funds + HEF 59 bps, XFLT 31 bps, UCR 19 bps.</div>
+    </div>
+  </section>
+
+  <div class="flag">
+    <b>Compliance note:</b> this page is internal research. Consilio is a lender/data-room name (BipSync notes reference lender-restricted information and a note records hearsay that "a big buyer has come in"). Treat as potentially restricted: do not forward outside King Street, and check with Compliance on information-barrier policy before trading on, or circulating, the items drawn from expert calls, lender calls and data-room material. Figures come from the Risk Cube, Markit and internal notes and have not been independently verified; prices and positions change daily.
+  </div>
+</div>
