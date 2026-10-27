@@ -1,9 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>HY Basket Builder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -15,20 +11,24 @@
  --s1:#3987e5;--s2:#d95926;--accent:#3987e5;--pos:#4cc27f;--neg:#f08a82;--warn:#e0b04a;--hover:#242422}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-header{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);padding:10px 16px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1{font-size:16px;margin:0 0 8px}
 .bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
 .bar label{display:flex;align-items:center;gap:6px;color:var(--ink2);font-size:13px}
 input,select,button{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
 input[type=number]{width:90px}
 input[type=checkbox]{width:auto}
+select{max-width:100%}
+input[type=file]{max-width:100%}
+#addType{width:100%}
 button{cursor:pointer}button:hover{background:var(--hover)}
 button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 button.ghost{border-color:transparent;background:none;color:var(--ink3);padding:2px 6px}
 button.ghost:hover{color:var(--ink)}
 .muted{color:var(--ink3)}.sm{font-size:12px}
-main{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;padding:16px;max-width:1800px;margin:0 auto}
-@media (min-width:1150px){main{grid-template-columns:470px minmax(0,1fr);align-items:start}#build{position:sticky;top:78px;max-height:calc(100vh - 92px);overflow:auto;padding-right:4px}}
+main{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1800px;margin:0 auto}
+@media (min-width:1150px){main{grid-template-columns:470px minmax(0,1fr);align-items:start}#build{position:sticky;top:calc(84px + env(safe-area-inset-top,0px));max-height:calc(100vh - 100px);overflow:auto;padding-right:4px}}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
 .card h2{font-size:13px;margin:0;display:flex;align-items:center;gap:6px}
 .card .hd{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}
@@ -48,19 +48,18 @@ td input[type=number]{width:72px;text-align:right;padding:2px 4px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:12px}
 .tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .tile .l{font-size:12px;color:var(--ink2)}.tile .v{font-size:20px;font-weight:600}.tile .c{font-size:12px;color:var(--ink3)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,440px),1fr));gap:12px}
 .chartbox{position:relative;width:100%}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin-bottom:6px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 .warn{color:var(--warn);font-size:12px}.err{color:var(--neg);font-size:12px}
 .pos{color:var(--pos)}.neg{color:var(--neg)}
+#msg{min-height:0;font-size:12px;color:var(--ink2);margin-top:6px}#msg:empty{display:none}
 .note{font-size:12px;color:var(--ink3);margin:6px 0}
 dialog{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;max-width:520px;width:92%}
 dialog label{display:block;margin:6px 0;font-size:12px;color:var(--ink2)}dialog input,dialog select{width:100%}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 </style>
-</head>
-<body>
 <header>
  <h1>HY Basket Builder <span class="muted sm" id="srcNote"></span></h1>
  <div class="bar">
@@ -69,8 +68,8 @@ dialog label{display:block;margin:6px 0;font-size:12px;color:var(--ink2)}dialog 
   <label>Benchmark <select id="bench"><option value="full">BAML HY (full)</option><option value="x">BAML HY ex-Fossil Fuels</option></select></label>
   <label>Load positions file <input type="file" id="file" accept=".xlsx,.xls,.csv"></label>
   <button class="primary" id="dl">Download CSV</button>
-  <button id="theme" title="Toggle theme">◐</button>
  </div>
+ <div id="msg" role="status"></div>
 </header>
 <main>
  <section id="build">
@@ -114,6 +113,7 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const pct=(x,d=2)=>x==null||isNaN(x)?'–':(x*100).toFixed(d)+'%';
 const num=(x,d=2)=>x==null||isNaN(x)?'–':Number(x).toFixed(d);
 
+let msgT;function notify(t){const m=$('#msg');m.textContent=t;clearTimeout(msgT);msgT=setTimeout(()=>m.textContent='',9000)}
 // ---------- dimensions & metrics ----------
 const DIMS={
  sector:{label:'KS GICS Sector',key:r=>r.sector},
@@ -350,7 +350,7 @@ $('#layers').addEventListener('change',async e=>{
  else if(t.dataset.a==='size'){l.size=Math.max(+t.value,1e-4);l.targets={}}
  else if(t.dataset.a==='q'){l.q=t.value}
  else if(t.dataset.a==='edOnly'){l.edOnly=t.checked}
- else if(t.dataset.a==='mdFile'&&t.files[0]){const rows=parseSheet(await t.files[0].arrayBuffer());rows.forEach(r=>S.md[r.isin]=r);alert(`Loaded market data for ${rows.length} ISINs.`)}
+ else if(t.dataset.a==='mdFile'&&t.files[0]){const rows=parseSheet(await t.files[0].arrayBuffer());rows.forEach(r=>S.md[r.isin]=r);notify(`Loaded market data for ${rows.length} ISINs.`)}
  else return;
  refresh();
 });
@@ -364,14 +364,45 @@ $('#layers').addEventListener('click',e=>{
  else if(a==='rmIsin'){l.items.splice(+t.dataset.i,1);syncIsinTargets(l)}
  else if(a==='addIsin'){
   const isin=card.querySelector('[data-a=isinIn]').value.trim().toUpperCase(),w=+card.querySelector('[data-a=isinW]').value;
-  if(!/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin)){alert('Enter a valid 12-character ISIN.');return}
-  if(!(w>0)){alert('Enter a weight above 0.');return}
-  if(l.items.some(x=>x.isin===isin)){alert('Already in this layer.');return}
+  if(!/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin)){notify('Enter a valid 12-character ISIN.');return}
+  if(!(w>0)){notify('Enter a weight above 0.');return}
+  if(l.items.some(x=>x.isin===isin)){notify('Already in this layer.');return}
   l.items.push({isin,weight:w});syncIsinTargets(l);
-  if(!S.base.some(r=>r.isin===isin)&&!S.md[isin])askMarketData(isin);
- }else return;
+  if(!S.base.some(r=>r.isin===isin)&&!S.md[isin])lookupIsin(isin).then(ok=>{if(ok)refresh();else askMarketData(isin)});
+  }else return;
  refresh();
 });
+const SF='Snowflake';
+function lookupSql(isins){
+ return `WITH latest AS (SELECT MAX(as_of_date) AS d FROM DBT_PROD.MART.FACT_BAML_BOND_ANALYTICS_TIMESERIES)
+SELECT b.isin, COALESCE(i.issuer_name, i.ks_issuer_name), b.bond_ticker || ' ' || TO_CHAR(b.par_weighted_coupon) || ' ' || TO_CHAR(b.bond_maturity_date, 'MM/DD/YY'),
+ COALESCE(NULLIF(b.ks_gics_sector, ''), i.ks_sector), b.industry_lvl_1_desc, b.industry_lvl_2_desc, b.industry_lvl_3_desc, b.industry_lvl_4_desc,
+ CASE WHEN r.composite_rating_rank <= 10 THEN 'IG' WHEN r.composite_rating_rank <= 14 THEN 'BB' WHEN r.composite_rating_rank <= 17 THEN 'B' WHEN r.composite_rating_rank <= 21 THEN 'CCC and below' END,
+ b.bond_country_code, 'Q' || QUARTER(b.bond_maturity_date), a.price, a.effective_duration, a.effective_yield, a.oas, a.yield_to_maturity, a.yield_to_worst
+FROM DBT_PROD.MART.FACT_BAML_BOND_ANALYTICS_TIMESERIES a JOIN latest l ON a.as_of_date = l.d
+JOIN DBT_PROD.MART.DIM_BAML_BOND b ON b.baml_security_id = a.baml_security_id
+LEFT JOIN DBT_PROD.MART.DIM_ISSUER i ON i.id_bb_global_company = a.id_bb_global_company
+LEFT JOIN DBT_PROD.MART.FACT_CREDIT_RATING_CURRENT r ON r.baml_security_id = a.baml_security_id
+WHERE b.isin IN (${isins.map(x=>`'${x}'`).join(',')})`;
+}
+const LK=['isin','issuer','sec','sector','l1','l2','l3','l4','rating','country','qtr','price','dur','effy','oas','ytm','ytw'];
+function lookupRows(res){
+ let p=res.payload;if(typeof p==='string'){try{p=JSON.parse(p)}catch(e){p=null}}
+ if(!p){const t=(res.content||[]).find(c=>c.type==='text');try{p=JSON.parse(t.text)}catch(e){}}
+ const data=(p&&p.result_set?p.result_set:p||{}).data;if(!Array.isArray(data))throw {code:'shape',message:'Unexpected result from Snowflake.'};
+ return data.map(a=>{const o={};LK.forEach((k,i)=>{let v=a[i];if(v===''||v==null)v=null;else if(i>=11)v=+v;o[k]=v});return o});
+}
+async function lookupIsin(isin){
+ if(!/^[A-Z0-9]{12}$/.test(isin))return false;
+ const mcp=window.claude?await window.claude.use('mcp'):null;
+ if(!mcp){notify(`${isin}: live lookup is not available in this view.`);return false}
+ notify(`Looking up ${isin} in Snowflake…`);
+ try{const res=await mcp.callTool(SF,'execute_analyst_sql',{sql:lookupSql([isin])});const rows=lookupRows(res);
+  if(!rows.length||!(rows[0].price>0)){notify(`${isin}: not found in the latest ICE analytics.`);return false}
+  S.md[isin]=rows[0];notify(`${isin}: market data loaded (${rows[0].sec||rows[0].issuer}).`);return true}
+ catch(e){const c=e&&e.code;
+  notify(c==='server_not_connected'||c==='needs_reauth'?'Snowflake is not connected. Add or reconnect it in claude.ai Settings → Connectors.':c==='approval_required'||c==='not_in_manifest'||c==='consent_required'?'Snowflake access was not allowed for this page.':c==='tool_error'?'Snowflake rejected the query: '+(e.message||'').slice(0,160):`Lookup failed (${c||'error'}).`);return false}
+}
 function askMarketData(isin){
  const f=$('#dlgForm');const fld=(k,l,t='text')=>`<label>${l}<input name="${k}" type="${t}" ${t==='number'?'step="any"':''}></label>`;
  f.innerHTML=`<h3 style="margin-top:0">Market data for ${isin}</h3><p class="note">Not in the BAML file. Load a market data CSV in the layer (see market_data_lookup.sql) or enter the key fields here. Price is required.</p>
@@ -379,7 +410,7 @@ function askMarketData(isin){
  <label>Rating bucket<select name="rating"><option>BB</option><option>B</option><option>CCC and below</option><option>IG</option></select></label>${fld('country','Country')}
  ${fld('price','Price','number')}${fld('ytw','Yield to worst','number')}${fld('ytm','Yield to maturity','number')}${fld('effy','Effective yield','number')}${fld('oas','OAS (bp)','number')}${fld('dur','Eff. duration','number')}</div>
  <div style="text-align:right;margin-top:10px"><button value="cancel">Cancel</button> <button class="primary" value="ok">Save</button></div>`;
- f.onsubmit=ev=>{if(ev.submitter&&ev.submitter.value==='ok'){const o={isin};new FormData(f).forEach((v,k)=>{if(v!=='')o[k]=['issuer','sec','sector','l3','rating','country'].includes(k)?v:+v});if(o.price>0){S.md[isin]=o;refresh()}else alert('Price is required.')}};
+ f.onsubmit=ev=>{if(ev.submitter&&ev.submitter.value==='ok'){const o={isin};new FormData(f).forEach((v,k)=>{if(v!=='')o[k]=['issuer','sec','sector','l3','rating','country'].includes(k)?v:+v});if(o.price>0){S.md[isin]=o;refresh()}else notify('Price is required.')}};
  $('#dlg').showModal();
 }
 $('#addLayer').onclick=()=>{S.layers.push(newLayer($('#addType').value));refresh()};
@@ -389,23 +420,23 @@ $('#step').onchange=e=>{S.step=Math.max(1,+e.target.value);refresh(false)};
 $('#bench').onchange=e=>{S.bench=e.target.value;refresh()};
 $('#cmpDim').onchange=()=>drawCmp();
 $('#posQ').oninput=e=>{S.posQ=e.target.value;drawPos()};
-$('#theme').onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=dark?'light':'dark';drawCharts()};
+new MutationObserver(()=>setTimeout(drawCharts,0)).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>setTimeout(drawCharts,0));
 $('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;
  try{const rows=parseSheet(await f.arrayBuffer());if(!rows.some(r=>r.wSec>0)||!rows.some(r=>r.price>0))throw new Error('File needs Isin, Price and "Security Weight in BAML HY Index" columns.');
   loadData({keys:Object.keys(HDR).map(k=>HDR[k]),rows:rows.map(r=>Object.values(HDR).map(k=>r[k]??null)),src:f.name,asof:''});
-  S.layers=[];S.md={};refresh()}catch(err){alert(err.message||'Could not read file.')}};
-$('#dl').onclick=()=>{
+  S.layers=[];S.md={};refresh()}catch(err){notify(err.message||'Could not read file.')}};
+$('#dl').onclick=async()=>{
  const cols=['Isin','Issuer','Security','KS GICS Sector','IndustryLvl1Desc','IndustryLvl2Desc','IndustryLvl3Desc','IndustryLvl4Desc','Rating Bucket','Iso Country Code','Quarter of Maturity Date','Beta','Price','Effective Duration','Effective Yield','Option Adjusted Spread','Yield To Maturity','Yield To Worst','Source','BAML HY Weight','Custom Target Weight','Custom Actual Weight','Active Weight vs BAML','Notional (Face)','Market Value'];
  const q=v=>v==null?'':typeof v==='number'?String(v):`"${String(v).replace(/"/g,'""')}"`;
  const idx=S.U.map((_,i)=>i).sort((a,b)=>S.aw[b]-S.aw[a]||S.bw[b]-S.bw[a]);
- const lines=[cols.join(',')].concat(idx.map(i=>{const r=S.U[i];return[r.isin,r.issuer,r.sec,r.sector,r.l1,r.l2,r.l3,r.l4,r.rating,r.country,r.qtr,r.beta,r.price,r.dur,r.effy,r.oas,r.ytm,r.ytw,r.added?'Added':'BAML HY',+S.bw[i].toFixed(10),+S.tw[i].toFixed(10),+S.aw[i].toFixed(10),+(S.aw[i]-S.bw[i]).toFixed(10),S.face[i],+S.mv[i].toFixed(2)].map(q).join(',')}));
- const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));
- a.download=`hy_basket_${S.cash}mm_${S.bench==='x'?'exFF_':''}${new Date().toISOString().slice(0,10)}.csv`;a.click();
+ const csv=[cols.join(',')].concat(idx.map(i=>{const r=S.U[i];return[r.isin,r.issuer,r.sec,r.sector,r.l1,r.l2,r.l3,r.l4,r.rating,r.country,r.qtr,r.beta,r.price,r.dur,r.effy,r.oas,r.ytm,r.ytw,r.added?'Added':'BAML HY',+S.bw[i].toFixed(10),+S.tw[i].toFixed(10),+S.aw[i].toFixed(10),+(S.aw[i]-S.bw[i]).toFixed(10),S.face[i],+S.mv[i].toFixed(2)].map(q).join(',')})).join('\n');
+ const fn=`hy_basket_${S.cash}mm_${S.bench==='x'?'exFF_':''}${new Date().toISOString().slice(0,10)}.csv`;
+ let d=null;try{d=window.claude?await window.claude.use('downloads'):null}catch(e){}
+ if(d){try{await d.save({filename:fn,data:csv});notify('Saved '+fn)}catch(e){if(e&&e.code!=='declined')notify('Download failed ('+(e.code||e.message)+').')}}
+ else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=fn;a.click()}
 };
 
 loadData(DATA);cmpOptions();buildChartShells();compute();renderLayers();drawTiles();drawCharts();drawCmp();drawPos();
 window.__S=S;
 </script>
-</body>
-</html>
