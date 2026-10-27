@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HY Basket Builder</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{color-scheme:light;--bg:#f6f6f4;--surface:#fcfcfb;--line:#e3e2dd;--ink:#0b0b0b;--ink2:#52514e;--ink3:#8a8984;
+ --s1:#2a78d6;--s2:#eb6834;--accent:#2a78d6;--pos:#0a7a3d;--neg:#b3261e;--warn:#9a6700;--hover:#f0efec}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#121211;--surface:#1a1a19;--line:#333330;--ink:#f0efec;--ink2:#c3c2b7;--ink3:#8d8c85;
+ --s1:#3987e5;--s2:#d95926;--accent:#3987e5;--pos:#4cc27f;--neg:#f08a82;--warn:#e0b04a;--hover:#242422}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#121211;--surface:#1a1a19;--line:#333330;--ink:#f0efec;--ink2:#c3c2b7;--ink3:#8d8c85;
+ --s1:#3987e5;--s2:#d95926;--accent:#3987e5;--pos:#4cc27f;--neg:#f08a82;--warn:#e0b04a;--hover:#242422}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);padding:10px 16px}
+h1{font-size:16px;margin:0 0 8px}
+.bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.bar label{display:flex;align-items:center;gap:6px;color:var(--ink2);font-size:13px}
+input,select,button{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+input[type=number]{width:90px}
+input[type=checkbox]{width:auto}
+button{cursor:pointer}button:hover{background:var(--hover)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.ghost{border-color:transparent;background:none;color:var(--ink3);padding:2px 6px}
+button.ghost:hover{color:var(--ink)}
+.muted{color:var(--ink3)}.sm{font-size:12px}
+main{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;padding:16px;max-width:1800px;margin:0 auto}
+@media (min-width:1150px){main{grid-template-columns:470px minmax(0,1fr);align-items:start}#build{position:sticky;top:78px;max-height:calc(100vh - 92px);overflow:auto;padding-right:4px}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
+.card h2{font-size:13px;margin:0;display:flex;align-items:center;gap:6px}
+.card .hd{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}
+.layer .sub{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+table{border-collapse:collapse;width:100%}
+th,td{padding:3px 6px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:600;color:var(--ink2);font-size:12px;position:sticky;top:0;background:var(--surface);cursor:default}
+th:first-child,td:first-child{text-align:left}
+td.name{max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.scroll{max-height:330px;overflow:auto;border:1px solid var(--line);border-radius:6px}
+.scroll.tall{max-height:520px}
+tr.edited td{background:color-mix(in srgb,var(--accent) 9%,transparent)}
+td input[type=number]{width:72px;text-align:right;padding:2px 4px}
+.mini{position:relative;width:70px;height:8px;background:var(--line);border-radius:4px;display:inline-block;vertical-align:middle}
+.mini i{position:absolute;left:0;top:0;bottom:0;background:var(--s1);border-radius:4px}
+.mini b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--s2)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.tile .l{font-size:12px;color:var(--ink2)}.tile .v{font-size:20px;font-weight:600}.tile .c{font-size:12px;color:var(--ink3)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:12px}
+.chartbox{position:relative;width:100%}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin-bottom:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.warn{color:var(--warn);font-size:12px}.err{color:var(--neg);font-size:12px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+.note{font-size:12px;color:var(--ink3);margin:6px 0}
+dialog{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;max-width:520px;width:92%}
+dialog label{display:block;margin:6px 0;font-size:12px;color:var(--ink2)}dialog input,dialog select{width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style>
+</head>
+<body>
+<header>
+ <h1>HY Basket Builder <span class="muted sm" id="srcNote"></span></h1>
+ <div class="bar">
+  <label>Cash ($mm) <input type="number" id="cash" value="100" min="0" step="10"></label>
+  <label><input type="checkbox" id="rnd" checked> Round notionals to <input type="number" id="step" value="1000" min="1" step="1000" style="width:80px"></label>
+  <label>Benchmark <select id="bench"><option value="full">BAML HY (full)</option><option value="x">BAML HY ex-Fossil Fuels</option></select></label>
+  <label>Load positions file <input type="file" id="file" accept=".xlsx,.xls,.csv"></label>
+  <button class="primary" id="dl">Download CSV</button>
+  <button id="theme" title="Toggle theme">◐</button>
+ </div>
+</header>
+<main>
+ <section id="build">
+  <div class="card">
+   <div class="hd"><h2>Construction layers</h2></div>
+   <div class="bar">
+    <select id="addType">
+     <option value="group">Group weights (sector / industry / rating / issuer / security…)</option>
+     <option value="bucket">Bucket weights (price / yield / OAS / duration…)</option>
+     <option value="isin">Custom ISINs</option>
+    </select>
+    <button id="addLayer">+ Add layer</button>
+   </div>
+   <p class="note">Layers apply top to bottom, starting from BAML weights. Type a target % for a row to fix it; every row you leave blank is scaled pro-rata so the basket stays 100%. Put Custom ISINs last for exact weights.</p>
+  </div>
+  <div id="layers"></div>
+ </section>
+ <section id="out">
+  <div class="tiles" id="tiles"></div>
+  <div id="warnings"></div>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Custom basket</span><span><i style="background:var(--s2)"></i>BAML HY</span></div>
+  <div class="grid" id="charts"></div>
+  <div class="card" style="margin-top:12px">
+   <div class="hd"><h2>Weights vs BAML</h2>
+    <select id="cmpDim"></select></div>
+   <div class="scroll tall"><table id="cmp"></table></div>
+  </div>
+  <div class="card">
+   <div class="hd"><h2>Positions</h2><input id="posQ" placeholder="Search isin / issuer / security" style="width:240px"></div>
+   <div class="scroll tall"><table id="pos"></table></div>
+   <p class="note" id="posNote"></p>
+  </div>
+  <p class="note">Weights are market-value weights (clean price, accrued ignored). Face = weight × cash ÷ price. Averages are weight-averaged over bonds with a valid value; yields ≥ 50% or ≤ −5% (distressed / placeholder 99.99) are excluded from yield averages.</p>
+ </section>
+</main>
+<dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
+<script>
+const DATA=/*__DATA__*/null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct=(x,d=2)=>x==null||isNaN(x)?'–':(x*100).toFixed(d)+'%';
+const num=(x,d=2)=>x==null||isNaN(x)?'–':Number(x).toFixed(d);
+
+// ---------- dimensions & metrics ----------
+const DIMS={
+ sector:{label:'KS GICS Sector',key:r=>r.sector},
+ l1:{label:'Industry Level 1',key:r=>r.l1},
+ l2:{label:'Industry Level 2',key:r=>r.l2},
+ l3:{label:'Industry Level 3',key:r=>r.l3},
+ l4:{label:'Industry Level 4',key:r=>r.l4},
+ rating:{label:'Rating bucket',key:r=>r.rating,order:['IG','BB','B','CCC and below']},
+ country:{label:'Country',key:r=>r.country},
+ qtr:{label:'Quarter of maturity',key:r=>r.qtr},
+ issuer:{label:'Issuer',key:r=>r.issuer},
+ sec:{label:'Security',key:r=>r.isin,name:r=>r.sec||r.isin}
+};
+const METRICS={
+ price:{label:'Price',f:r=>r.price,size:5,lo:70,hi:110,d:0},
+ ytw:{label:'Yield to worst',f:r=>vy(r.ytw),size:1,lo:4,hi:14,d:0},
+ ytm:{label:'Yield to maturity',f:r=>vy(r.ytm),size:1,lo:4,hi:14,d:0},
+ effy:{label:'Effective yield',f:r=>vy(r.effy),size:1,lo:4,hi:14,d:0},
+ oas:{label:'OAS (bp)',f:r=>r.oas!=null&&r.oas<5000?r.oas:null,size:100,lo:100,hi:1000,d:0},
+ dur:{label:'Effective duration',f:r=>r.dur,size:1,lo:0,hi:8,d:0},
+ beta:{label:'Beta',f:r=>r.beta,size:0.25,lo:0,hi:2.5,d:2}
+};
+const vy=v=>v!=null&&v>-5&&v<50?v:null;
+const CHARTS=[['rating','dim'],['sector','dim'],['price','m'],['ytw','m'],['ytm','m'],['effy','m'],['oas','m'],['dur','m'],['beta','m'],['l3','dim'],['l4','dim'],['country','dim'],['qtr','dim'],['issuer','dim']];
+
+// ---------- state ----------
+const S={cash:100,round:true,step:1000,bench:'full',base:[],md:{},layers:[],uid:1,cmp:'rating',cmpSort:['bw',-1],posQ:''};
+function mapRows(keys,rows){return rows.map(a=>{const o={};keys.forEach((k,i)=>o[k]=a[i]);return o})}
+function loadData(d){
+ S.base=mapRows(d.keys,d.rows).map(finalize);S.src=d.src;S.asof=d.asof;
+ $('#srcNote').textContent=`· ${S.base.length} bonds · ${d.src}${d.asof?' · as of '+d.asof:''}`;
+ const hasX=S.base.some(r=>r.wSecX>0);$('#bench').querySelector('[value=x]').disabled=!hasX;if(!hasX)S.bench='full',$('#bench').value='full';
+}
+function finalize(r){r.wSec=+r.wSec||0;r.wSecX=+r.wSecX||0;r.sector=r.sector||'Unclassified';['l1','l2','l3','l4','rating','country','qtr'].forEach(k=>r[k]=r[k]||'Unclassified');r.issuer=r.issuer||r.isin;return r}
+const HDR={isin:'isin',issuer:'issuer',security:'sec',ksgicssector:'sector',industrylvl1desc:'l1',industrylvl2desc:'l2',industrylvl3desc:'l3',industrylvl4desc:'l4',issuerinks:'inKS',inbamlhyexcludingfossilfuels:'exFF',ratingbucket:'rating',isocountrycode:'country',quarterofmaturitydate:'qtr',beta:'beta',issuerweightinbamlhyindex:'wIss',issuerweightinbamlhyindexexcfossilfuels:'wIssX',securityweightinbamlhyindex:'wSec',securityweightinbamlhyindexexcfossilfuels:'wSecX',price:'price',effectiveduration:'dur',effectiveyield:'effy',optionadjustedspread:'oas',yieldtomaturity:'ytm',yieldtoworst:'ytw'};
+function parseSheet(buf){
+ const wb=XLSX.read(buf,{type:'array'});const js=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:null});
+ return js.map(j=>{const o={};for(const h in j){const k=HDR[h.toLowerCase().replace(/[^a-z0-9]/g,'')];if(k)o[k]=j[h]}
+  ['beta','wIss','wIssX','wSec','wSecX','price','dur','effy','oas','ytm','ytw'].forEach(k=>{if(o[k]!=null)o[k]=+o[k]});
+  if(o.isin)o.isin=String(o.isin).trim().toUpperCase();return o}).filter(o=>o.isin);
+}
+
+// ---------- engine ----------
+function universe(){
+ const have=new Set(S.base.map(r=>r.isin));const ex=[];
+ S.layers.filter(l=>l.type==='isin').forEach(l=>l.items.forEach(it=>{
+  if(!have.has(it.isin)&&S.md[it.isin]){have.add(it.isin);ex.push(finalize({wSec:0,wSecX:0,...S.md[it.isin],added:true}))}}));
+ return S.base.concat(ex);
+}
+function bucketKey(l,v){
+ if(v==null)return{k:'n/a',s:1e9};const b=Math.floor(v/l.size+1e-9)*l.size;const d=METRICS[l.metric].d;
+ return{k:`${b.toFixed(d)} – ${(b+l.size).toFixed(d)}`,s:b};
+}
+function keyer(l){
+ if(l.type==='bucket'){const f=METRICS[l.metric].f;return r=>bucketKey(l,f(r)).k}
+ if(l.type==='isin')return r=>r.isin;
+ return DIMS[l.dim].key;
+}
+function applyLayer(w,l,U){
+ const kf=keyer(l),G=new Map();
+ U.forEach((r,i)=>{const k=kf(r);let g=G.get(k);if(!g)G.set(k,g={k,idx:[],G:0,n:0});g.idx.push(i);g.G+=w[i]});
+ let sumT=0,over=false;const fixed=new Map();
+ for(const k in l.targets){const t=l.targets[k];if(t==null||!G.has(k))continue;fixed.set(k,t/100);sumT+=t/100}
+ let scale=1;if(sumT>1+1e-9){over=true;scale=1/sumT;sumT=1}
+ let Go=0;G.forEach(g=>{if(!fixed.has(g.k))Go+=g.G});
+ const k=Go>0?(1-sumT)/Go:0;const out=new Array(w.length).fill(0);
+ G.forEach(g=>{
+  if(fixed.has(g.k)){const t=fixed.get(g.k)*scale;g.t=t;g.out=t;
+   g.idx.forEach(i=>out[i]=g.G>0?w[i]*t/g.G:t/g.idx.length)}
+  else{g.out=g.G*k;g.idx.forEach(i=>out[i]=w[i]*k)}
+ });
+ const tot=out.reduce((a,b)=>a+b,0);if(tot>0&&Math.abs(tot-1)>1e-12)for(let i=0;i<out.length;i++)out[i]/=tot;
+ return{out,G,k,sumT,over,Go};
+}
+function compute(){
+ const U=universe();S.U=U;
+ const bw=U.map(r=>S.bench==='x'?r.wSecX:r.wSec);const bs=bw.reduce((a,b)=>a+b,0)||1;S.bw=bw.map(x=>x/bs);
+ let w=S.bw.slice();S.snaps=[];
+ S.layers.forEach(l=>{const start=w;const res=applyLayer(w,l,U);res.start=start;S.snaps.push(res);w=res.out});
+ S.tw=w;
+ // sizing
+ const cash=S.cash*1e6;S.warn=[];const n=U.length;S.face=new Array(n).fill(0);S.mv=new Array(n).fill(0);
+ let noPx=0;
+ for(let i=0;i<n;i++){if(w[i]<=0)continue;const p=U[i].price;if(!(p>0)){noPx++;continue}
+  let f=w[i]*cash*100/p;if(S.round&&S.step>0)f=Math.round(f/S.step)*S.step;S.face[i]=f;S.mv[i]=f*p/100}
+ const tmv=S.mv.reduce((a,b)=>a+b,0);S.tmv=tmv;S.aw=S.mv.map(x=>tmv>0?x/tmv:0);
+ S.held=S.face.filter(x=>x>0).length;S.resid=cash-tmv;S.noPx=noPx;
+ S.layers.forEach((l,j)=>{if(S.snaps[j].over)S.warn.push(`Layer ${j+1}: targets sum above 100% – scaled down.`)
+  if(l.type==='isin')l.items.forEach(it=>{if(!U.some(r=>r.isin===it.isin))S.warn.push(`${it.isin}: no market data – excluded. Load market data CSV or enter manually.`)})});
+ if(noPx)S.warn.push(`${noPx} bonds have no price and could not be sized.`);
+}
+function wavg(f,wt){let a=0,s=0;S.U.forEach((r,i)=>{const v=f(r);if(v!=null&&wt[i]>0){a+=v*wt[i];s+=wt[i]}});return s>0?a/s:null}
+
+// ---------- aggregation ----------
+function groupsFor(spec){ // returns ordered [{k,label,c,b,n,nb}]
+ const U=S.U,m=new Map();let order=null,numeric=false,kf,nameF=null;
+ if(spec.type==='dim'){const d=DIMS[spec.id];kf=d.key;order=d.order;nameF=d.name}
+ else{const M=METRICS[spec.id];numeric=true;var L0={size:M.size,metric:spec.id};const L=L0;
+  kf=r=>{const v=M.f(r);if(v==null)return'n/a';if(v<M.lo)return`< ${M.lo.toFixed(M.d)}`;if(v>=M.hi)return`≥ ${M.hi.toFixed(M.d)}`;return bucketKey(L,v).k}}
+ U.forEach((r,i)=>{const k=kf(r);let g=m.get(k);if(!g)m.set(k,g={k,label:nameF?nameF(r):k,c:0,b:0,n:0,nb:0,lo:0});
+  g.c+=S.aw[i];g.b+=S.bw[i];if(S.face[i]>0)g.n++;if(S.bw[i]>0)g.nb++});
+ let arr=[...m.values()];
+ if(numeric){const M=METRICS[spec.id];const pos=g=>g.k==='n/a'?1e9:g.k[0]==='<'?-1e9:g.k[0]==='≥'?1e8:parseFloat(g.k);arr.sort((a,b)=>pos(a)-pos(b));
+  // fill empty bins between lo and hi
+  const have=new Set(arr.map(g=>g.k));const full=[];
+  for(let b=M.lo;b<M.hi-1e-9;b+=M.size)full.push(bucketKey(L0,b+1e-9).k);
+  full.forEach(k=>{if(!have.has(k))arr.push({k,label:k,c:0,b:0,n:0,nb:0})});arr.sort((a,b)=>pos(a)-pos(b))}
+ else if(order){const ix=k=>{const i=order.indexOf(k);return i<0?99:i};arr.sort((a,b)=>ix(a.k)-ix(b.k)||a.k.localeCompare(b.k))}
+ else if(spec.id==='qtr')arr.sort((a,b)=>a.k.localeCompare(b.k));
+ else arr.sort((a,b)=>Math.max(b.b,b.c)-Math.max(a.b,a.c));
+ return arr;
+}
+
+// ---------- charts ----------
+const charts={};
+function cssv(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function buildChartShells(){
+ $('#charts').innerHTML=CHARTS.map(([id,t],i)=>`<div class="card"><div class="hd"><h2>${id==='issuer'?'Top 20 issuers':esc((t==='dim'?DIMS[id]:METRICS[id]).label)}${t==='m'?` <span class="muted sm">(bucket ${METRICS[id].size})</span>`:''}</h2></div><div class="chartbox" id="cb${i}"><canvas id="cv${i}"></canvas></div></div>`).join('');
+ for(const k in charts){charts[k].destroy();delete charts[k]}
+}
+function drawCharts(){
+ const ink2=cssv('--ink2'),line=cssv('--line'),s1=cssv('--s1'),s2=cssv('--s2');
+ CHARTS.forEach(([id,t],i)=>{
+  let g=groupsFor({type:t,id});const MAX={issuer:20,l4:25,country:12}[id]||15;
+  if(g.length>MAX&&t==='dim'&&id==='issuer')g=g.slice(0,MAX);
+  else if(g.length>MAX&&t==='dim'){const top=g.slice(0,MAX),rest=g.slice(MAX);top.push({label:'Other',k:'Other',c:rest.reduce((a,x)=>a+x.c,0),b:rest.reduce((a,x)=>a+x.b,0),n:0,nb:0});g=top}
+  const horiz=t==='dim'&&g.length>6;const cb=$('#cb'+i);cb.style.height=horiz?(50+g.length*30)+'px':'260px';
+  const labels=g.map(x=>x.label.length>34?x.label.slice(0,33)+'…':x.label);
+  const cfg={type:'bar',data:{labels,datasets:[{label:'Custom basket',data:g.map(x=>x.c*100),backgroundColor:s1,borderRadius:3,barPercentage:.9,categoryPercentage:.8},{label:'BAML HY',data:g.map(x=>x.b*100),backgroundColor:s2,borderRadius:3,barPercentage:.9,categoryPercentage:.8}]},
+   options:{indexAxis:horiz?'y':'x',responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed[horiz?'x':'y'].toFixed(2)}%`,afterBody:it=>{const j=it[0].dataIndex;const d=(g[j].c-g[j].b)*100;return `Active: ${d>=0?'+':''}${d.toFixed(2)}pp`}}}},
+    scales:{[horiz?'x':'y']:{beginAtZero:true,grid:{color:line},ticks:{color:ink2,callback:v=>v+'%'}},[horiz?'y':'x']:{grid:{display:false},ticks:{color:ink2,autoSkip:false,maxRotation:horiz?0:50}}}}};
+  if(charts[i]){charts[i].data=cfg.data;charts[i].options=cfg.options;charts[i].update()}else charts[i]=new Chart($('#cv'+i),cfg);
+ });
+}
+
+// ---------- tiles / tables ----------
+function drawTiles(){
+ const f=[['Bonds held',null],['Cash invested',null]];
+ const items=[['Price',r=>r.price,2,''],['Yield to worst',r=>vy(r.ytw),2,'%'],['Yield to maturity',r=>vy(r.ytm),2,'%'],['OAS',r=>r.oas!=null&&r.oas<5000?r.oas:null,0,' bp'],['Eff. duration',r=>r.dur,2,''],['Beta',r=>r.beta,2,'']];
+ let as=0;S.U.forEach((r,i)=>as+=Math.abs(S.aw[i]-S.bw[i]));as/=2;
+ let h=`<div class="tile"><div class="l">Bonds held</div><div class="v">${S.held}</div><div class="c">BAML: ${S.bw.filter(x=>x>0).length}</div></div>
+ <div class="tile"><div class="l">Market value</div><div class="v">$${(S.tmv/1e6).toFixed(2)}mm</div><div class="c">Residual cash $${(S.resid/1e3).toFixed(1)}k</div></div>
+ <div class="tile"><div class="l">Active share vs BAML</div><div class="v">${(as*100).toFixed(1)}%</div><div class="c">½ Σ|w − bmk|</div></div>`;
+ items.forEach(([l,fn,d,u])=>{const c=wavg(fn,S.aw),b=wavg(fn,S.bw),df=c!=null&&b!=null?c-b:null;
+  h+=`<div class="tile"><div class="l">${l}</div><div class="v">${num(c,d)}${c!=null?u:''}</div><div class="c">BAML ${num(b,d)}${u} · Δ ${df==null?'–':(df>=0?'+':'')+df.toFixed(d)}</div></div>`});
+ $('#tiles').innerHTML=h;
+ $('#warnings').innerHTML=S.warn.map(x=>`<div class="warn">⚠ ${esc(x)}</div>`).join('');
+}
+function cmpOptions(){
+ $('#cmpDim').innerHTML=Object.entries(DIMS).map(([k,v])=>`<option value="d:${k}">${v.label}</option>`).join('')+Object.entries(METRICS).map(([k,v])=>`<option value="m:${k}">${v.label} (buckets)</option>`).join('');
+ $('#cmpDim').value='d:'+S.cmp;
+}
+function drawCmp(){
+ const [t,id]=$('#cmpDim').value.split(':');let g=groupsFor({type:t==='d'?'dim':'m',id});
+ const [sk,sd]=S.cmpSort;if(sk==='label'){g.sort((a,b)=>sd*a.label.localeCompare(b.label))}else if(sk){g.sort((a,b)=>sd*((sk==='diff'?a.c-a.b:a[sk])-(sk==='diff'?b.c-b.b:b[sk])))}
+ const th=(k,l)=>`<th data-s="${k}" style="cursor:pointer">${l}${S.cmpSort[0]===k?(S.cmpSort[1]>0?' ▲':' ▼'):''}</th>`;
+ const tc=g.reduce((a,x)=>a+x.c,0),tb=g.reduce((a,x)=>a+x.b,0);
+ $('#cmp').innerHTML=`<thead><tr>${th('label','Group')}${th('b','BAML %')}${th('c','Basket %')}${th('diff','Active pp')}<th># basket</th><th># BAML</th></tr></thead><tbody>`+
+ g.slice(0,400).map(x=>{const d=(x.c-x.b)*100;return`<tr><td class="name" title="${esc(x.label)}">${esc(x.label)}</td><td>${pct(x.b)}</td><td>${pct(x.c)}</td><td class="${d>0.005?'pos':d<-0.005?'neg':''}">${d>=0?'+':''}${d.toFixed(2)}</td><td>${x.n}</td><td>${x.nb}</td></tr>`}).join('')+
+ `<tr><td><b>Total</b></td><td>${pct(tb)}</td><td>${pct(tc)}</td><td></td><td>${g.reduce((a,x)=>a+x.n,0)}</td><td>${g.reduce((a,x)=>a+x.nb,0)}</td></tr></tbody>`;
+ $('#cmp').querySelectorAll('th[data-s]').forEach(e=>e.onclick=()=>{const k=e.dataset.s;S.cmpSort=[k,S.cmpSort[0]===k?-S.cmpSort[1]:(k==='label'?1:-1)];drawCmp()});
+}
+function drawPos(){
+ const q=S.posQ.toLowerCase();const idx=S.U.map((r,i)=>i).filter(i=>(S.aw[i]>0||S.bw[i]>0)&&(!q||(S.U[i].isin+S.U[i].issuer+S.U[i].sec).toLowerCase().includes(q)));
+ idx.sort((a,b)=>Math.max(S.aw[b],S.bw[b])-Math.max(S.aw[a],S.bw[a]));
+ $('#pos').innerHTML=`<thead><tr><th>ISIN</th><th>Issuer</th><th>Security</th><th>Price</th><th>YTW</th><th>BAML %</th><th>Basket %</th><th>Active pp</th><th>Face</th></tr></thead><tbody>`+
+ idx.slice(0,300).map(i=>{const r=S.U[i],d=(S.aw[i]-S.bw[i])*100;return`<tr><td>${r.isin}${r.added?' <span class="warn">new</span>':''}</td><td class="name" title="${esc(r.issuer)}">${esc(r.issuer)}</td><td>${esc(r.sec)}</td><td>${num(r.price)}</td><td>${num(r.ytw)}</td><td>${pct(S.bw[i],3)}</td><td>${pct(S.aw[i],3)}</td><td class="${d>0.0005?'pos':d<-0.0005?'neg':''}">${d>=0?'+':''}${d.toFixed(3)}</td><td>${Math.round(S.face[i]).toLocaleString()}</td></tr>`}).join('')+'</tbody>';
+ $('#posNote').textContent=`Showing ${Math.min(300,idx.length)} of ${idx.length} positions, largest first. The CSV contains every line.`;
+}
+
+// ---------- layers UI ----------
+function layerTitle(l){return l.type==='group'?`Group weights – ${DIMS[l.dim].label}`:l.type==='bucket'?`Buckets – ${METRICS[l.metric].label}, size ${l.size}`:'Custom ISINs'}
+function renderLayers(){
+ const box=$('#layers');box.innerHTML='';
+ S.layers.forEach((l,j)=>{
+  const sn=S.snaps[j];const c=document.createElement('div');c.className='card layer';
+  let body='';
+  if(l.type==='isin')body=isinBody(l,j);
+  else{
+   let ctl=l.type==='group'?`<select data-a="dim">${Object.entries(DIMS).map(([k,v])=>`<option value="${k}" ${k===l.dim?'selected':''}>${v.label}</option>`).join('')}</select>`
+    :`<select data-a="metric">${Object.entries(METRICS).map(([k,v])=>`<option value="${k}" ${k===l.metric?'selected':''}>${v.label}</option>`).join('')}</select> bucket <input type="number" data-a="size" value="${l.size}" step="any" min="0.0001" style="width:70px">`;
+   body=`<div class="sub">${ctl}<input data-a="q" placeholder="Search…" value="${esc(l.q||'')}" style="width:120px"><label><input type="checkbox" data-a="edOnly" ${l.edOnly?'checked':''}> edited only</label></div>${groupTable(l,j)}`;
+  }
+  const fixedN=Object.values(l.targets).filter(v=>v!=null).length;
+  c.innerHTML=`<div class="hd"><h2>${j+1}. ${esc(layerTitle(l))}</h2><span><button class="ghost" data-a="up" title="Move up">↑</button><button class="ghost" data-a="down" title="Move down">↓</button><button class="ghost" data-a="reset" title="Clear targets">reset</button><button class="ghost" data-a="del" title="Remove layer">✕</button></span></div>${body}
+   <div class="note">${fixedN} fixed · fixed total ${pct(sn.sumT)} · other rows scaled ×${sn.k.toFixed(3)}${sn.over?' <span class="err">(over 100%)</span>':''}</div>`;
+  c.dataset.j=j;box.appendChild(c);
+ });
+}
+function groupTable(l,j){
+ const sn=S.snaps[j],U=S.U;const bg=new Map();const kf=keyer(l);U.forEach((r,i)=>{const k=kf(r);bg.set(k,(bg.get(k)||0)+S.bw[i])});
+ const nm=new Map();if(l.type==='group'&&DIMS[l.dim].name)U.forEach(r=>nm.set(kf(r),DIMS[l.dim].name(r)));
+ let arr=[...sn.G.values()];
+ if(l.type==='bucket'){const L=l;const sv=g=>{if(g.k==='n/a')return 1e9;return parseFloat(g.k)};arr.sort((a,b)=>sv(a)-sv(b))}else arr.sort((a,b)=>b.G-a.G);
+ const q=(l.q||'').toLowerCase();arr=arr.filter(g=>(!q||(g.k+(nm.get(g.k)||'')).toLowerCase().includes(q))&&(!l.edOnly||l.targets[g.k]!=null));
+ const mx=Math.max(1e-9,...arr.map(g=>Math.max(g.out,bg.get(g.k)||0)));const tot=arr.length;arr=arr.slice(0,120);
+ return`<div class="scroll"><table><thead><tr><th>Group</th><th>BAML</th><th>Result</th><th>vs BAML</th><th>Target %</th></tr></thead><tbody>`+arr.map(g=>{
+  const t=l.targets[g.k];const b=bg.get(g.k)||0;const lab=nm.get(g.k)||g.k;
+  return`<tr class="${t!=null?'edited':''}"><td class="name" title="${esc(lab)}">${esc(lab)}</td><td>${pct(b)}</td><td>${pct(g.out)}</td>
+  <td><span class="mini"><i style="width:${g.out/mx*100}%"></i><b style="left:${b/mx*100}%"></b></span></td>
+  <td><input type="number" step="0.1" min="0" data-g="${esc(g.k)}" data-fid="${j}:${esc(g.k)}" value="${t==null?'':+t.toFixed(4)}" placeholder="${(g.out*100).toFixed(2)}"><button class="ghost" data-a="zero" data-g="${esc(g.k)}" title="Remove (0%)">0</button></td></tr>`}).join('')+
+  `</tbody></table></div>${tot>120?`<div class="note">Showing 120 of ${tot} – search to find others.</div>`:''}<div class="note"><span class="mini" style="width:40px"><i style="width:60%"></i></span> basket result · <span class="mini" style="width:40px;background:none"><b style="left:50%"></b></span> BAML weight (orange tick)</div>`;
+}
+function isinBody(l,j){
+ const rows=l.items.map((it,n)=>{const r=S.U.find(x=>x.isin===it.isin);return`<tr class="edited"><td>${esc(it.isin)}</td><td class="name">${r?esc(r.sec||r.issuer):'<span class="warn">no market data</span>'}</td><td>${r&&!r.added?'in index':r?'new':''}</td>
+  <td><input type="number" step="0.1" min="0" data-i="${n}" data-fid="${j}:i${n}" value="${it.weight}"></td><td><button class="ghost" data-a="rmIsin" data-i="${n}">✕</button></td></tr>`}).join('');
+ return`<div class="sub"><input data-a="isinIn" placeholder="ISIN" style="width:130px" maxlength="12"><input type="number" data-a="isinW" placeholder="weight %" step="0.1" min="0" style="width:90px"><button data-a="addIsin">Add</button><label class="sm muted">Load market data CSV <input type="file" data-a="mdFile" accept=".csv,.xlsx"></label></div>
+ <div class="scroll"><table><thead><tr><th>ISIN</th><th>Security</th><th></th><th>Weight %</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan=5 class="muted">No ISINs added.</td></tr>'}</tbody></table></div>
+ <div class="note">Weights are fixed; every other bond is scaled down to make room. Market data for new ISINs comes from a CSV (see <code>market_data_lookup.sql</code>) or manual entry.</div>`;
+}
+function newLayer(t){
+ const id=S.uid++;
+ if(t==='group')return{id,type:'group',dim:'sector',targets:{}};
+ if(t==='bucket')return{id,type:'bucket',metric:'price',size:5,targets:{}};
+ return{id,type:'isin',items:[],targets:{}};
+}
+function syncIsinTargets(l){l.targets={};l.items.forEach(it=>l.targets[it.isin]=+it.weight)}
+
+// ---------- events ----------
+let pending=null;
+function refresh(full=true){
+ clearTimeout(pending);pending=setTimeout(()=>{
+  const ae=document.activeElement,fid=ae&&ae.dataset&&ae.dataset.fid;
+  compute();if(full)renderLayers();drawTiles();drawCharts();drawCmp();drawPos();
+  if(fid){const e=document.querySelector(`[data-fid="${CSS.escape(fid)}"]`);if(e)e.focus()}
+ },0);
+}
+$('#layers').addEventListener('change',async e=>{
+ const t=e.target,card=t.closest('.layer');if(!card)return;const j=+card.dataset.j,l=S.layers[j];
+ if(t.dataset.g!==undefined&&t.tagName==='INPUT'){const v=t.value.trim();if(v==='')delete l.targets[t.dataset.g];else l.targets[t.dataset.g]=Math.max(0,+v)}
+ else if(t.dataset.i!==undefined){l.items[+t.dataset.i].weight=Math.max(0,+t.value);syncIsinTargets(l)}
+ else if(t.dataset.a==='dim'){l.dim=t.value;l.targets={}}
+ else if(t.dataset.a==='metric'){l.metric=t.value;l.size=METRICS[t.value].size;l.targets={}}
+ else if(t.dataset.a==='size'){l.size=Math.max(+t.value,1e-4);l.targets={}}
+ else if(t.dataset.a==='q'){l.q=t.value}
+ else if(t.dataset.a==='edOnly'){l.edOnly=t.checked}
+ else if(t.dataset.a==='mdFile'&&t.files[0]){const rows=parseSheet(await t.files[0].arrayBuffer());rows.forEach(r=>S.md[r.isin]=r);alert(`Loaded market data for ${rows.length} ISINs.`)}
+ else return;
+ refresh();
+});
+$('#layers').addEventListener('click',e=>{
+ const t=e.target.closest('[data-a]');if(!t||t.tagName==='INPUT'&&t.type!=='button')return;const card=t.closest('.layer');if(!card)return;const j=+card.dataset.j,l=S.layers[j],a=t.dataset.a;
+ if(a==='del')S.layers.splice(j,1);
+ else if(a==='up'&&j>0)[S.layers[j-1],S.layers[j]]=[S.layers[j],S.layers[j-1]];
+ else if(a==='down'&&j<S.layers.length-1)[S.layers[j+1],S.layers[j]]=[S.layers[j],S.layers[j+1]];
+ else if(a==='reset'){l.targets={};if(l.items)l.items=[]}
+ else if(a==='zero')l.targets[t.dataset.g]=0;
+ else if(a==='rmIsin'){l.items.splice(+t.dataset.i,1);syncIsinTargets(l)}
+ else if(a==='addIsin'){
+  const isin=card.querySelector('[data-a=isinIn]').value.trim().toUpperCase(),w=+card.querySelector('[data-a=isinW]').value;
+  if(!/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin)){alert('Enter a valid 12-character ISIN.');return}
+  if(!(w>0)){alert('Enter a weight above 0.');return}
+  if(l.items.some(x=>x.isin===isin)){alert('Already in this layer.');return}
+  l.items.push({isin,weight:w});syncIsinTargets(l);
+  if(!S.base.some(r=>r.isin===isin)&&!S.md[isin])askMarketData(isin);
+ }else return;
+ refresh();
+});
+function askMarketData(isin){
+ const f=$('#dlgForm');const fld=(k,l,t='text')=>`<label>${l}<input name="${k}" type="${t}" ${t==='number'?'step="any"':''}></label>`;
+ f.innerHTML=`<h3 style="margin-top:0">Market data for ${isin}</h3><p class="note">Not in the BAML file. Load a market data CSV in the layer (see market_data_lookup.sql) or enter the key fields here. Price is required.</p>
+ <div class="row2">${fld('issuer','Issuer')}${fld('sec','Security')}${fld('sector','KS GICS Sector')}${fld('l3','Industry Lvl 3')}
+ <label>Rating bucket<select name="rating"><option>BB</option><option>B</option><option>CCC and below</option><option>IG</option></select></label>${fld('country','Country')}
+ ${fld('price','Price','number')}${fld('ytw','Yield to worst','number')}${fld('ytm','Yield to maturity','number')}${fld('effy','Effective yield','number')}${fld('oas','OAS (bp)','number')}${fld('dur','Eff. duration','number')}</div>
+ <div style="text-align:right;margin-top:10px"><button value="cancel">Cancel</button> <button class="primary" value="ok">Save</button></div>`;
+ f.onsubmit=ev=>{if(ev.submitter&&ev.submitter.value==='ok'){const o={isin};new FormData(f).forEach((v,k)=>{if(v!=='')o[k]=['issuer','sec','sector','l3','rating','country'].includes(k)?v:+v});if(o.price>0){S.md[isin]=o;refresh()}else alert('Price is required.')}};
+ $('#dlg').showModal();
+}
+$('#addLayer').onclick=()=>{S.layers.push(newLayer($('#addType').value));refresh()};
+$('#cash').onchange=e=>{S.cash=Math.max(0,+e.target.value);refresh(false)};
+$('#rnd').onchange=e=>{S.round=e.target.checked;refresh(false)};
+$('#step').onchange=e=>{S.step=Math.max(1,+e.target.value);refresh(false)};
+$('#bench').onchange=e=>{S.bench=e.target.value;refresh()};
+$('#cmpDim').onchange=()=>drawCmp();
+$('#posQ').oninput=e=>{S.posQ=e.target.value;drawPos()};
+$('#theme').onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=dark?'light':'dark';drawCharts()};
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>setTimeout(drawCharts,0));
+$('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;
+ try{const rows=parseSheet(await f.arrayBuffer());if(!rows.some(r=>r.wSec>0)||!rows.some(r=>r.price>0))throw new Error('File needs Isin, Price and "Security Weight in BAML HY Index" columns.');
+  loadData({keys:Object.keys(HDR).map(k=>HDR[k]),rows:rows.map(r=>Object.values(HDR).map(k=>r[k]??null)),src:f.name,asof:''});
+  S.layers=[];S.md={};refresh()}catch(err){alert(err.message||'Could not read file.')}};
+$('#dl').onclick=()=>{
+ const cols=['Isin','Issuer','Security','KS GICS Sector','IndustryLvl1Desc','IndustryLvl2Desc','IndustryLvl3Desc','IndustryLvl4Desc','Rating Bucket','Iso Country Code','Quarter of Maturity Date','Beta','Price','Effective Duration','Effective Yield','Option Adjusted Spread','Yield To Maturity','Yield To Worst','Source','BAML HY Weight','Custom Target Weight','Custom Actual Weight','Active Weight vs BAML','Notional (Face)','Market Value'];
+ const q=v=>v==null?'':typeof v==='number'?String(v):`"${String(v).replace(/"/g,'""')}"`;
+ const idx=S.U.map((_,i)=>i).sort((a,b)=>S.aw[b]-S.aw[a]||S.bw[b]-S.bw[a]);
+ const lines=[cols.join(',')].concat(idx.map(i=>{const r=S.U[i];return[r.isin,r.issuer,r.sec,r.sector,r.l1,r.l2,r.l3,r.l4,r.rating,r.country,r.qtr,r.beta,r.price,r.dur,r.effy,r.oas,r.ytm,r.ytw,r.added?'Added':'BAML HY',+S.bw[i].toFixed(10),+S.tw[i].toFixed(10),+S.aw[i].toFixed(10),+(S.aw[i]-S.bw[i]).toFixed(10),S.face[i],+S.mv[i].toFixed(2)].map(q).join(',')}));
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));
+ a.download=`hy_basket_${S.cash}mm_${S.bench==='x'?'exFF_':''}${new Date().toISOString().slice(0,10)}.csv`;a.click();
+};
+
+loadData(DATA);cmpOptions();buildChartShells();compute();renderLayers();drawTiles();drawCharts();drawCmp();drawPos();
+window.__S=S;
+</script>
+</body>
+</html>
